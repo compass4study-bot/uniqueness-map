@@ -1,5 +1,5 @@
 // 앱을 설치할 수 있게 해 주고, 인터넷이 잠깐 끊겨도 화면이 열리게 해 줘요.
-var CACHE = 'uniq-map-v1';
+var CACHE = 'uniq-map-v2';
 var FILES = ['./', './index.html', './config.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(FILES); }));
