@@ -1,0 +1,17 @@
+{
+  "name": "우리 반 고유성 지도",
+  "short_name": "고유성 지도",
+  "description": "8가지 질문으로 만든 도트 캐릭터가 각자의 길을 걷는 지도",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1d2433",
+  "theme_color": "#1d2433",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
