@@ -243,7 +243,7 @@ function analyze(st) {
   info.tall = /키(가)?(조금)?큰/.test(lk);
   info.skin = SKINS[seed % SKINS.length];
   info.blush = info.girl;
-  info.tallEyes = !info.glasses && r() < 0.5;
+  info.tallEyes = !info.glasses && r() < 0.6;
   info.pants = pick(['#2d3e66','#3b3b4f','#5a4632','#2f5d50','#4a3b6b','#6b2f3a'], r);
   info.shoes = pick(['#e74c3c','#ffffff','#3b3b3b','#f39c12','#2980b9'], r);
   info.capColor = pick(['#e74c3c','#2d3436','#0984e3','#00b894'], r);
@@ -265,7 +265,7 @@ function analyze(st) {
 }
 
 /* ===================== 도트 그리기 ===================== */
-var SW = 22, SH = 27; // 캐릭터 도화지 크기(칸)
+var SW = 22, SH = 24; // 캐릭터 도화지 크기(칸)
 function newGrid(w,h){ var g=[]; for (var y=0;y<h;y++){ g.push(new Array(w).fill(null)); } return g; }
 function outline(g) {
   var h=g.length, w=g[0].length, add=[];
@@ -282,61 +282,67 @@ var spriteCache = {};
 function buildSprite(info, frame) {
   var key = info.seed + '_' + frame;
   if (spriteCache[key]) return spriteCache[key];
-  var g = newGrid(SW, SH), OX = 2, OY = info.tall ? 0 : 1, L = info.tall ? 1 : 0;
+  // 귀여운 2등신: 큰 머리 + 작은 몸
+  var g = newGrid(SW, SH), OX = 3, OY = 3, L = info.tall ? 1 : 0;
   function R(x,y,w,h,c){ for (var j=0;j<h;j++) for (var i=0;i<w;i++){ var yy=OY+y+j, xx=OX+x+i; if (g[yy] && xx>=0 && xx<SW) g[yy][xx]=c; } }
   function P(x,y,c){ R(x,y,1,1,c); }
-  var skin=info.skin, sh=info.shirt, shD=shade(sh,-40), hc=info.hairColor, hcL=shade(hc,35);
-  // 다리 + 신발 (키 큰 학생은 다리가 한 칸 더 길어요)
-  R(5,17,6,3,info.pants);
-  if (frame === 0) { R(5,20,2,2+L,info.pants); R(9,20,2,2+L,info.pants); R(4,22+L,3,1,info.shoes); R(9,22+L,3,1,info.shoes); }
-  else { R(6,20,2,2+L,info.pants); R(8,20,2,2+L,info.pants); R(5,22+L,3,1,info.shoes); R(8,22+L,3,1,info.shoes); }
-  R(9,17,1,3,shade(info.pants,-25));
+  var skin=info.skin, skD=shade(skin,-28), sh=info.shirt, shD=shade(sh,-40), shL=shade(sh,35), hc=info.hairColor, hcL=shade(hc,45), hcD=shade(hc,-20);
+  var EYE='#2b2236', PINK='#ff9aa2';
+  // 다리 + 신발
+  R(5,16,6,1+L,info.pants);
+  if (frame === 0) { R(5,17+L,2,1,info.pants); R(9,17+L,2,1,info.pants); R(4,18+L,3,1,info.shoes); R(9,18+L,3,1,info.shoes); }
+  else { R(6,17+L,2,1,info.pants); R(8,17+L,2,1,info.pants); R(5,18+L,3,1,info.shoes); R(8,18+L,3,1,info.shoes); }
   // 몸통 + 팔
-  R(4,12,8,5,sh); R(11,12,1,5,shD); R(3,12,1,4,sh); R(12,12,1,4,shD); P(3,16,skin); P(12,16,skin);
-  if (info.stripe) R(4,14,8,1,shade(sh,55));
-  if (info.starPrint) { P(6,13,'#ffe066'); P(9,15,'#ffe066'); P(7,14,'#ffffff'); P(5,15,'#ffe066'); }
-  P(9,13,info.flag); // 특기 배지
-  // 목 + 얼굴
-  R(7,11,2,1,shade(skin,-25));
-  R(4,3,8,8,skin); P(4,10,null); P(11,10,null);
-  if (info.tallEyes) { R(6,6,1,2,OUT); R(9,6,1,2,OUT); } else { P(6,7,OUT); P(9,7,OUT); }
-  if (info.blush) { P(5,8,'#ff9aa2'); P(10,8,'#ff9aa2'); }
-  P(7,9,'#a8423b'); P(8,9,'#a8423b');
+  R(4,12,8,4,sh); R(11,12,1,4,shD); R(4,12,7,1,shL); R(3,12,1,3,sh); R(12,12,1,3,shD); P(3,15,skin); P(12,15,skin);
+  if (info.stripe) R(4,14,7,1,shade(sh,60));
+  if (info.starPrint) { P(5,13,'#ffe066'); P(8,14,'#ffe066'); P(6,14,'#ffffff'); P(9,13,'#ffffff'); }
+  P(10,14,info.flag); // 특기 배지
+  // 동그란 얼굴
+  R(3,2,10,10,skin); R(2,4,1,6,skin); R(13,4,1,6,skin); P(3,11,null); P(12,11,null);
+  R(4,11,8,1,skD); // 턱 그림자
+  // 반짝이는 큰 눈
+  if (info.tallEyes) { R(5,6,2,3,EYE); R(9,6,2,3,EYE); P(5,6,'#ffffff'); P(9,6,'#ffffff'); P(6,8,'#6b7cff'); P(10,8,'#6b7cff'); }
+  else { R(5,7,2,2,EYE); R(9,7,2,2,EYE); P(5,7,'#ffffff'); P(9,7,'#ffffff'); }
+  // 볼터치 + 입
+  var by = info.glasses ? 10 : 9;
+  R(3,by,2,1,PINK); R(11,by,2,1,PINK);
+  if (info.seed % 2) { P(7,10,'#c0504d'); P(8,10,'#c0504d'); } else { P(6,10,'#c0504d'); P(9,10,'#c0504d'); P(7,10,'#e07a6a'); P(8,10,'#e07a6a'); }
   // 머리카락
-  function top(){ R(4,2,8,2,hc); R(3,3,1,3,hc); R(12,3,1,3,hc); P(5,2,hcL); P(6,2,hcL); }
-  function bangs(){ R(4,4,8,1,hc); P(7,4,skin); }
+  function top(){ R(3,1,10,2,hc); R(2,2,12,1,hc); R(2,3,1,3,hc); R(13,3,1,3,hc); P(5,1,hcL); P(6,1,hcL); P(4,2,hcL); }
+  function bangs(){ R(3,3,10,1,hc); R(3,4,3,1,hc); R(7,4,3,1,hc); R(11,4,2,1,hc); P(6,4,hcD); P(10,4,hcD); }
   switch (info.hair) {
-    case 'long':  top(); bangs(); R(3,6,1,7,hc); R(12,6,1,7,hc); P(4,5,hc); P(11,5,hc); break;
-    case 'curly': top(); bangs(); R(3,6,1,7,hc); R(12,6,1,7,hc); P(4,5,hc); P(11,5,hc);
-                  P(2,7,hc); P(2,10,hc); P(13,8,hc); P(13,11,hc); P(3,13,hc); P(12,13,hc); P(2,4,hc); P(13,5,hc); break;
-    case 'pony':  top(); bangs(); P(12,2,'#ff6b81'); R(13,2,2,2,hc); R(13,4,1,4,hc); break;
-    case 'ponylong': top(); bangs(); P(12,2,'#ff6b81'); R(13,2,2,2,hc); R(13,4,1,8,hc); P(14,7,hc); break;
-    case 'bowl':  R(3,2,10,2,hc); R(3,4,10,2,hc); R(3,6,1,1,hc); R(12,6,1,1,hc); P(5,2,hcL); P(6,2,hcL); P(7,2,hcL); break;
-    case 'part':  top(); R(4,4,3,1,hc); R(9,4,3,1,hc); P(4,5,hc); P(11,5,hc); P(8,2,shade(hc,-25)); break;
-    case 'buzz':  R(4,2,8,1,shade(hc,25)); R(3,3,1,2,shade(hc,25)); R(12,3,1,2,shade(hc,25)); break;
-    case 'hood':  R(4,3,8,1,shade(hc,25)); R(3,1,10,2,sh); R(2,3,2,9,sh); R(12,3,2,9,sh); R(4,1,8,1,shade(sh,30));
-                  R(3,3,1,8,shD); R(12,3,1,8,shD); P(6,12,'#ffffff'); P(10,12,'#ffffff'); break;
-    case 'spiky': top(); bangs(); P(4,1,hc); P(6,0,hc); P(6,1,hc); P(8,1,hc); P(9,0,hc); P(9,1,hc); P(11,1,hc); break;
-    case 'bob':   top(); bangs(); R(3,6,1,4,hc); R(12,6,1,4,hc); break;
+    case 'long':  top(); bangs(); R(1,5,2,8,hc); R(13,5,2,8,hc); P(2,4,hc); P(13,4,hc); P(1,12,hcD); P(14,12,hcD); break;
+    case 'curly': top(); bangs(); R(1,5,2,8,hc); R(13,5,2,8,hc); P(2,4,hc); P(13,4,hc);
+                  P(0,6,hc); P(0,9,hc); P(0,12,hc); P(15,7,hc); P(15,10,hc); P(15,13,hc); P(1,13,hc); P(14,13,hc); break;
+    case 'pony':  top(); bangs(); P(13,1,'#ff6b81'); P(14,2,'#ff6b81'); R(14,1,2,2,hc); R(15,3,1,4,hc); P(15,1,hcL); break;
+    case 'ponylong': top(); bangs(); P(13,1,'#ff6b81'); P(14,2,'#ff6b81'); R(14,1,2,2,hc); R(15,3,1,8,hc); P(16,7,hc); P(16,8,hc); P(15,1,hcL); break;
+    case 'bowl':  R(3,0,10,1,hc); R(2,1,12,5,hc); R(2,6,1,1,hc); R(13,6,1,1,hc); R(4,1,3,1,hcL); R(3,5,10,1,hcD); break;
+    case 'part':  top(); R(3,3,4,2,hc); R(9,3,4,2,hc); P(3,5,hc); P(12,5,hc); P(8,1,hcD); P(8,2,hcD); break;
+    case 'buzz':  var bz=shade(hc,30); R(3,1,10,2,bz); R(2,3,1,2,bz); R(13,3,1,2,bz); P(5,1,shade(bz,25)); break;
+    case 'hood':  R(3,2,10,1,shade(hc,30)); R(3,0,10,2,sh); R(2,1,12,1,sh); R(1,2,2,10,sh); R(13,2,2,10,sh); R(4,0,6,1,shL);
+                  R(2,3,1,8,shD); R(13,3,1,8,shD); P(6,12,'#ffffff'); P(9,12,'#ffffff'); P(6,13,'#ffffff'); P(9,13,'#ffffff'); break;
+    case 'spiky': top(); bangs(); P(3,0,hc); P(5,-1,hc); P(5,0,hc); P(8,0,hc); P(8,-1,hc); P(11,0,hc); P(12,0,hc); break;
+    case 'bob':   top(); bangs(); R(1,5,2,5,hc); R(13,5,2,5,hc); break;
     default:      top(); bangs();
   }
-  // 안경
-  if (info.glasses) { var gc = info.glasses; R(5,6,6,1,gc); P(7,6,skin); P(8,6,skin); P(5,7,gc); P(7,7,gc); P(8,7,gc); P(10,7,gc); P(6,8,shade(gc,40)); P(9,8,shade(gc,40)); }
+  // 동그란 안경
+  if (info.glasses) { var gc = info.glasses;
+    R(5,6,2,1,gc); R(9,6,2,1,gc); P(4,7,gc); P(4,8,gc); P(7,7,gc); P(7,8,gc); P(8,7,gc); P(11,7,gc); P(11,8,gc); R(5,9,2,1,gc); R(9,9,2,1,gc); }
   // 머리 장식 (좋아하는 음악)
-  var hy = info.hair === 'hood' ? 0 : 1; // 후드면 한 칸 위
+  var hy = info.hair === 'hood' ? -1 : 0;
   switch (info.acc) {
-    case 'cap':    R(4,1,8,3,info.capColor); P(5,1,shade(info.capColor,40)); R(3,4,11,1,shade(info.capColor,-35)); break;
-    case 'phones': R(3,hy,10,1,'#4b4b5e'); R(2,5,2,3,'#4b4b5e'); R(12,5,2,3,'#4b4b5e'); P(2,6,'#5ec8ff'); P(13,6,'#5ec8ff'); break;
-    case 'clip':   P(10,2,'#ffd93b'); P(9,3,'#ffd93b'); P(10,3,'#ff7ad9'); P(11,3,'#ffd93b'); P(10,4,'#ffd93b'); break;
-    case 'catears':R(3,hy-1,2,2,'#2b2b2b'); R(11,hy-1,2,2,'#2b2b2b'); P(4,hy,'#ff9aa2'); P(11,hy,'#ff9aa2'); R(4,hy+1,8,1,'#2b2b2b'); break;
-    case 'note':   P(11,1,'#5b6ee1'); P(12,1,'#5b6ee1'); P(11,2,'#5b6ee1'); P(10,3,'#5b6ee1'); P(11,3,'#5b6ee1'); break;
-    case 'sprout': P(7,hy-1,'#4caf50'); P(7,hy-2,'#4caf50'); P(6,hy-3,'#7bd389'); P(8,hy-3,'#7bd389'); P(5,hy-3,'#7bd389'); P(9,hy-3,'#7bd389'); break;
-    case 'shades': R(5,hy+1,2,1,'#222233'); R(9,hy+1,2,1,'#222233'); R(7,hy+1,2,1,'#555566'); P(5,hy+1,'#3d6bff'); P(9,hy+1,'#3d6bff'); break;
-    case 'bowtie': P(6,12,'#d63031'); P(7,12,'#a01f20'); P(8,12,'#a01f20'); P(9,12,'#d63031'); break;
+    case 'cap':    R(3,0,10,3,info.capColor); R(5,0,2,1,shade(info.capColor,45)); R(2,3,13,1,shade(info.capColor,-35)); P(8,1,'#ffffff'); break;
+    case 'phones': R(3,hy-1,10,1,'#4b4b5e'); R(2,hy,1,2,'#4b4b5e'); R(13,hy,1,2,'#4b4b5e'); R(0,5,2,4,'#4b4b5e'); R(14,5,2,4,'#4b4b5e'); P(0,6,'#5ec8ff'); P(15,6,'#5ec8ff'); break;
+    case 'clip':   P(12,0,'#ffd93b'); P(11,1,'#ffd93b'); P(12,1,'#ff7ad9'); P(13,1,'#ffd93b'); P(12,2,'#ffd93b'); break;
+    case 'catears':R(3,hy-1,2,2,'#2b2b2b'); P(3,hy-2,'#2b2b2b'); P(4,hy,PINK); R(11,hy-1,2,2,'#2b2b2b'); P(12,hy-2,'#2b2b2b'); P(11,hy,PINK); R(3,hy+1,10,1,'#2b2b2b'); break;
+    case 'note':   P(12,-1,'#5b6ee1'); P(13,-1,'#5b6ee1'); P(12,0,'#5b6ee1'); P(11,1,'#5b6ee1'); P(12,1,'#5b6ee1'); break;
+    case 'sprout': P(8,hy,'#4caf50'); P(8,hy-1,'#4caf50'); R(6,hy-2,2,1,'#7bd389'); R(9,hy-2,2,1,'#7bd389'); P(7,hy-1,'#7bd389'); P(9,hy-1,'#7bd389'); break;
+    case 'shades': R(4,hy+1,3,1,'#222233'); R(9,hy+1,3,1,'#222233'); R(7,hy+1,2,1,'#555566'); P(4,hy+1,'#3d6bff'); P(9,hy+1,'#3d6bff'); break;
+    case 'bowtie': P(6,12,'#ff4d6d'); P(7,12,'#c0304a'); P(8,12,'#c0304a'); P(9,12,'#ff4d6d'); break;
   }
   // 손에 든 물건 (취미)
   var it = ITEMS[info.item];
-  stamp(g, it, OX + 13, OY + 16 - Math.floor(it.g.length/2));
+  stamp(g, it, OX + 13, OY + 15 - Math.floor(it.g.length/2));
   outline(g);
   spriteCache[key] = toCanvas(g);
   return spriteCache[key];
@@ -376,7 +382,7 @@ var TREE = { p:{g:'#2f8f4e',l:'#47b06a',b:'#7a4b2a'}, g:['..lll..','.lgggl.','lg
 var FLOWER_COLORS = ['#ffffff','#ffd93b','#ff8fc7','#a29bfe'];
 
 /* ===================== 지도 ===================== */
-var W = 560, H = 370, CX = W/2, CY = H/2 + 6;
+var W = 500, H = 330, CX = W/2, CY = H/2 + 6;
 var canvas = document.getElementById('map'), ctx = canvas.getContext('2d');
 var world = document.createElement('canvas'); world.width = W; world.height = H;
 var wctx = world.getContext('2d');
